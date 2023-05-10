@@ -309,7 +309,7 @@ def find_min_max(model_name, all_ps, cut_val=20, top_k = 10):
             layers[layer] = 1
         else:
             layers[layer] += 1
-        if layers[layer] <= 3:
+        if layers[layer] <= 3: # limits the number of selected neurons to be at most three per layer. 
             if (layer, neuron, min_ps[k][0]) in neuron_dict[model_name]:
                 continue
             if Print_Level > 0:
@@ -587,7 +587,7 @@ def reverse_engineer(optz_option, images, weights_file, Troj_Layer, Troj_Neuron,
         acc = np.sum(preds == Troj_Label)/float(rlogits.shape[0])
         return acc, adv, rdelta, rcon_mask, Troj_Label
 
-def re_mask(neuron_dict, layers, images):
+def re_mask(neuron_dict, layers, images, ExperimentName):
     validated_results = []
     for key in sorted(neuron_dict.keys()):
         weights_file = key
@@ -597,9 +597,9 @@ def re_mask(neuron_dict, layers, images):
             Troj_next_Layer = layers[layers.index(Troj_Layer) + 1]
             Troj_next_Neuron = Troj_Neuron
             optz_option = 0
-            RE_img = './imgs/{0}_model_{1}_{2}_{3}_{4}.png'.format(weights_file.split('/')[-1][:-3], Troj_Layer, Troj_Neuron, Troj_size, Troj_Label)
-            RE_mask = './masks/{0}_model_{1}_{2}_{3}_{4}'.format(weights_file.split('/')[-1][:-3], Troj_Layer, Troj_Neuron, Troj_size, Troj_Label)
-            RE_delta = './deltas/{0}_model_{1}_{2}_{3}_{4}'.format(weights_file.split('/')[-1][:-3], Troj_Layer, Troj_Neuron, Troj_size, Troj_Label)
+            RE_img = './{0}/imgs/{1}_model_{2}_{3}_{4}_{5}.png'.format(ExperimentName, weights_file.split('/')[-1][:-3], Troj_Layer, Troj_Neuron, Troj_size, Troj_Label)
+            RE_mask = './{0}/masks/{1}_model_{2}_{3}_{4}_{5}'.format(ExperimentName, weights_file.split('/')[-1][:-3], Troj_Layer, Troj_Neuron, Troj_size, Troj_Label)
+            RE_delta = './{0}/deltas/{1}_model_{2}_{3}_{4}_{5}'.format(ExperimentName, weights_file.split('/')[-1][:-3], Troj_Layer, Troj_Neuron, Troj_size, Troj_Label)
             # flog = open('result_par_mul.txt', 'a')
             # flog.write('\n\n{0} {1} {2} {3} {4} {5}\n\n'.format(optz_option, weights_file, Troj_Layer, Troj_next_Layer, Troj_Neuron, Troj_Label))
             # flog.close()
@@ -802,7 +802,7 @@ def filter_reverse_engineer(optz_option, images, weights_file, Troj_Layer, Troj_
         # acc = np.sum(np.argmax(rlogits, axis=1) == Troj_Label)/float(rlogits.shape[0])
         return acc, adv, rdelta, Troj_Label
 
-def re_filter(neuron_dict, layers, processed_xs):
+def re_filter(neuron_dict, layers, processed_xs,ExperimentName):
     validated_results = []
     for key in sorted(neuron_dict.keys()):
         weights_file = key
@@ -817,8 +817,8 @@ def re_filter(neuron_dict, layers, processed_xs):
             max_acc = 0
             max_results = []
             for i  in range(filter_multi_start):
-                RE_img = './imgs/filter_{0}_model_{1}_{2}_{3}_{4}.png'.format(weights_file.split('/')[-1][:-3], Troj_Layer, Troj_Neuron, Troj_size, Troj_Label)
-                RE_delta = './deltas/filter_{0}_model_{1}_{2}_{3}_{4}'.format(weights_file.split('/')[-1][:-3], Troj_Layer, Troj_Neuron, Troj_size, Troj_Label)
+                RE_img = './{0}/imgs/filter_{1}_model_{2}_{3}_{4}_{5}.png'.format(ExperimentName,weights_file.split('/')[-1][:-3], Troj_Layer, Troj_Neuron, Troj_size, Troj_Label)
+                RE_delta = './{0}/deltas/filter_{1}_model_{2}_{3}_{4}_{5}'.format(ExperimentName,weights_file.split('/')[-1][:-3], Troj_Layer, Troj_Neuron, Troj_size, Troj_Label)
                 
                 variables1 = filter_load_model(optz_option, weights_file, Troj_Layer, Troj_next_Layer)
                 variables2 = filter_define_graph(optz_option, Troj_Layer, Troj_next_Layer, Troj_Neuron, Troj_next_Neuron, variables1)
@@ -901,7 +901,8 @@ def test(weights_file, test_xs, result, mode='mask'):
     return score
 
 if __name__ == '__main__':
-    # config['model_file'] = sys.argv[1]
+    if len(sys.arv)>1:
+        ExperimentName= sys.argv[1]
 # def main():
     if use_pickle:
         fxs, fys = pickle.load(open(seed_file, 'rb'))
@@ -955,7 +956,7 @@ if __name__ == '__main__':
     maxreasr = 0
     reasr_info = []
 
-    results = re_mask(neuron_dict, layers, processed_xs)
+    results = re_mask(neuron_dict, layers, processed_xs,ExperimentName)
     if len(results) > 0:
         reasrs = []
         for result in results:
@@ -984,7 +985,7 @@ if __name__ == '__main__':
         print(str(config['model_file']), 'mask check', 0)
 
     # filter check 
-    results = re_filter(neuron_dict, layers, processed_xs)
+    results = re_filter(neuron_dict, layers, processed_xs, ExperimentName)
     if len(results) > 0:
         reasrs = []
         for result in results:
@@ -994,7 +995,7 @@ if __name__ == '__main__':
             if reasr > reasr_bound:
             # if True:
                 for i in range(adv.shape[0]):
-                    imageio.imwrite(RE_img[:-4]+'_{0}.png'.format(i), adv[i])
+                    imageio.imwrite(RE_img[:-4]+'_{1}.png'.format(i), adv[i])
                 if use_pickle:
                     with open(RE_delta+'.pkl', 'wb') as f:
                         pickle.dump(rdelta, f)
@@ -1007,6 +1008,30 @@ if __name__ == '__main__':
         print(str(config['model_file']), 'filter check', max(reasrs))
     else:
         print(str(config['model_file']), 'filter check', 0)
+    
+    if use_pickle:
+        with open('./'+ExperimentName,'/'+'results.pkl', 'wb') as f:
+            pickle.dump(results, f)
+        with open('./'+ExperimentName,'/'+'reasrs.pkl', 'wb') as f:
+            pickle.dump(reasrs, f)
+        with open('./'+ExperimentName,'/'+'reasr_info.pkl', 'wb') as f:
+            pickle.dump(reasr_info, f)
+        with open('./'+ExperimentName,'/'+'max_reasr.pkl', 'wb') as f:
+            pickle.dump(maxreasr, f)
+        with open('./'+ExperimentName,'/'+'config.pkl', 'wb') as f:
+            pickle.dump(config, f)
+    if use_h5:
+        with h5py.File('./'+ExperimentName,'/'+'results.h5', "w") as f:
+            f.create_dataset('results', data=results)
+        with h5py.File('./'+ExperimentName,'/'+'reasrs.h5', "w") as f:
+            f.create_dataset('reasrs', data=reasrs)
+        with h5py.File('./'+ExperimentName,'/'+'reasr_info.h5', "w") as f:
+            f.create_dataset('reasr_info', data=reasr_info)
+        with h5py.File('./'+ExperimentName,'/'+'max_reasr.h5', "w") as f:
+            f.create_dataset('maxreasr', data=maxreasr)
+        with h5py.File('./'+ExperimentName,'/'+'config.h5', "w") as f:
+            f.create_dataset('config', data=config)
+
 
     print(str(config['model_file']), 'both filter and mask check', maxreasr)
     for info in reasr_info:
