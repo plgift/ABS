@@ -994,6 +994,30 @@ if __name__ == '__main__':
             if reasr > maxreasr:
                 maxreasr = reasr
         print(str(config['model_file']), 'mask check', max(reasrs))
+        
+        if use_pickle:
+            with open('./'+ExperimentName+'/results.pkl', 'wb') as f:
+                pickle.dump(results, f)
+            with open('./'+ExperimentName+'/reasrs.pkl', 'wb') as f:
+                pickle.dump(reasrs, f)
+            with open('./'+ExperimentName+'/reasr_info.pkl', 'wb') as f:
+                pickle.dump(reasr_info, f)
+            with open('./'+ExperimentName+'/max_reasr.pkl', 'wb') as f:
+                pickle.dump(maxreasr, f)
+            with open('./'+ExperimentName+'/config.pkl', 'wb') as f:
+                pickle.dump(config, f)
+        if use_h5:
+            with h5py.File('./'+ExperimentName+'/results.h5', "w") as f:
+                f.create_dataset('results', data=results)
+            with h5py.File('./'+ExperimentName+'/reasrs.h5', "w") as f:
+                f.create_dataset('reasrs', data=reasrs)
+            with h5py.File('./'+ExperimentName +'/reasr_info.h5', "w") as f:
+                f.create_dataset('reasr_info', data=reasr_info)
+            with h5py.File('./'+ExperimentName+'/max_reasr.h5', "w") as f:
+                f.create_dataset('maxreasr', data=maxreasr)
+            with h5py.File('./'+ExperimentName+'/config.h5', "w") as f:
+                f.create_dataset('config', data=config)
+
     else:
         print(str(config['model_file']), 'mask check', 0)
 
