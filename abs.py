@@ -21,6 +21,9 @@ random_seed = int(config['random_seed'])
 os.environ["CUDA_VISIBLE_DEVICES"] = config["gpu_id"]
 print('use pickle', use_pickle, 'use_h5', use_h5, 'channel_last', channel_last, 'gpu_id', config["gpu_id"])
 
+
+
+
 import tensorflow.keras as keras
 from tensorflow.keras.models import Model, Sequential, model_from_yaml, load_model
 from tensorflow.keras import backend as K
@@ -903,6 +906,8 @@ def test(weights_file, test_xs, result, mode='mask'):
 if __name__ == '__main__':
     if len(sys.argv)>1:
         ExperimentName= sys.argv[1]
+        if not os.path.exists('./{0}', ExperimentName):
+            os.makedirs('./{0}',ExperimentName)
 # def main():
     if use_pickle:
         fxs, fys = pickle.load(open(seed_file, 'rb'))
