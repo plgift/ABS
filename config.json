@@ -16,11 +16,11 @@
     "has_softmax": 1,
 
     "_comment": "====Neuron Sampling====",
-    "samp_k": 4,
+    "samp_k": 2,
     "same_range": 0,
-    "n_samples": 5,
-    "samp_batch_size": 4,
-    "top_n_neurons": 10,
+    "n_samples": 3,
+    "samp_batch_size": 2,
+    "top_n_neurons": 2,
 
     "_comment": "====RE Mask====",
     "max_troj_size": 64,
@@ -29,7 +29,5 @@
     "re_mask_lr": 1e-1,
     "re_mask_weight": 500,
 
-    "_comment": "====RE Mask====",
-    "experiment_name": 'absVSrand'
 
 }
