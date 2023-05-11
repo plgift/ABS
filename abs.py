@@ -907,7 +907,11 @@ if __name__ == '__main__':
     if len(sys.argv)>1:
         ExperimentName= sys.argv[1]
         if not os.path.exists('./'+ExperimentName):
-            os.makedirs('./'+ExperimentName)
+            os.makedirs('./'+ExperimentName +'/deltas')
+            os.makedirs('./'+ExperimentName +'/imgs')
+            os.makedirs('./'+ExperimentName +'/masks')
+            os.makedirs('./'+ExperimentName +'/temp') #unclear this is needed but adding for now.
+
 # def main():
     if use_pickle:
         fxs, fys = pickle.load(open(seed_file, 'rb'))
