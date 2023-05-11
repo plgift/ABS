@@ -27,7 +27,6 @@
     "mask_multi_start": 1,
     "filter_multi_start": 1,
     "re_mask_lr": 1e-1,
-    "re_mask_weight": 500,
-
+    "re_mask_weight": 500
 
 }
