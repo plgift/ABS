@@ -906,6 +906,7 @@ def test(weights_file, test_xs, result, mode='mask'):
 if __name__ == '__main__':
     if len(sys.argv)>1:
         ExperimentName= sys.argv[1]
+        modelfilename=sys.argv[2]
         if not os.path.exists('./'+ExperimentName):
             os.makedirs('./'+ExperimentName +'/deltas')
             os.makedirs('./'+ExperimentName +'/imgs')
@@ -935,7 +936,10 @@ if __name__ == '__main__':
         print('# samples for RE', len(ys))
     test_xs = fxs
     test_ys = fys
-    model = load_model(str(config['model_file']))
+    model=load_model(modelfilename)
+    config['modelFileName']=modelfilename
+    #model = load_model(str(config['model_file'])) #TODO make this dynamic, with a default behavior if not provided as an input argument. 
+    
     if Print_Level > 0:
         model.summary()
     for i in range(len(model.layers)):
@@ -1019,30 +1023,31 @@ if __name__ == '__main__':
         print(str(config['model_file']), 'filter check', 0)
     
     if use_pickle:
-        with open('./'+ExperimentName,'/'+'results.pkl', 'wb') as f:
+        with open('./'+ExperimentName+'/results.pkl', 'wb') as f:
             pickle.dump(results, f)
-        with open('./'+ExperimentName,'/'+'reasrs.pkl', 'wb') as f:
+        with open('./'+ExperimentName+'/reasrs.pkl', 'wb') as f:
             pickle.dump(reasrs, f)
-        with open('./'+ExperimentName,'/'+'reasr_info.pkl', 'wb') as f:
+        with open('./'+ExperimentName+'/reasr_info.pkl', 'wb') as f:
             pickle.dump(reasr_info, f)
-        with open('./'+ExperimentName,'/'+'max_reasr.pkl', 'wb') as f:
+        with open('./'+ExperimentName+'/max_reasr.pkl', 'wb') as f:
             pickle.dump(maxreasr, f)
-        with open('./'+ExperimentName,'/'+'config.pkl', 'wb') as f:
+        with open('./'+ExperimentName+'/config.pkl', 'wb') as f:
             pickle.dump(config, f)
     if use_h5:
-        with h5py.File('./'+ExperimentName,'/'+'results.h5', "w") as f:
+        with h5py.File('./'+ExperimentName+'/results.h5', "w") as f:
             f.create_dataset('results', data=results)
-        with h5py.File('./'+ExperimentName,'/'+'reasrs.h5', "w") as f:
+        with h5py.File('./'+ExperimentName+'/reasrs.h5', "w") as f:
             f.create_dataset('reasrs', data=reasrs)
-        with h5py.File('./'+ExperimentName,'/'+'reasr_info.h5', "w") as f:
+        with h5py.File('./'+ExperimentName +'/reasr_info.h5', "w") as f:
             f.create_dataset('reasr_info', data=reasr_info)
-        with h5py.File('./'+ExperimentName,'/'+'max_reasr.h5', "w") as f:
+        with h5py.File('./'+ExperimentName+'/max_reasr.h5', "w") as f:
             f.create_dataset('maxreasr', data=maxreasr)
-        with h5py.File('./'+ExperimentName,'/'+'config.h5', "w") as f:
+        with h5py.File('./'+ExperimentName+'/config.h5', "w") as f:
             f.create_dataset('config', data=config)
 
 
-    print(str(config['model_file']), 'both filter and mask check', maxreasr)
+    #print(str(config['model_file']), 'both filter and mask check', maxreasr)
+    print(str(modelfilename), 'both filter and mask check', maxreasr)
     for info in reasr_info:
         print('reasr info', info)
 
