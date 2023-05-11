@@ -901,7 +901,7 @@ def test(weights_file, test_xs, result, mode='mask'):
     return score
 
 if __name__ == '__main__':
-    if len(sys.arv)>1:
+    if len(sys.argv)>1:
         ExperimentName= sys.argv[1]
 # def main():
     if use_pickle:
