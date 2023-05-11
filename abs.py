@@ -906,8 +906,8 @@ def test(weights_file, test_xs, result, mode='mask'):
 if __name__ == '__main__':
     if len(sys.argv)>1:
         ExperimentName= sys.argv[1]
-        if not os.path.exists('./{0}', ExperimentName):
-            os.makedirs('./{0}',ExperimentName)
+        if not os.path.exists('./'+ExperimentName):
+            os.makedirs('./'+ExperimentName)
 # def main():
     if use_pickle:
         fxs, fys = pickle.load(open(seed_file, 'rb'))
