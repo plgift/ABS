@@ -203,7 +203,7 @@ def sample_neuron(images, labels, model, mvs):
                     ps = [tps[img_i+n_images*i] for i in range(n_samples)]
                     ps = np.asarray(ps)
                     ps = ps.T
-                    all_ps[ps_key] = np.copy(ps)
+                    all_ps[ps_key] = np.copy(ps)# neuron dict is the key to all_ps.
     return all_ps
 
 
@@ -574,8 +574,8 @@ def reverse_engineer(optz_option, images, weights_file, Troj_Layer, Troj_Neuron,
         if Print_Level > 1:
             print(preds)
         # Troj_Label = np.argmax(np.bincount(preds))
-        acc = np.sum(preds == Troj_Label)/float(rlogits.shape[0])
-        return acc, adv, rdelta, rcon_mask, Troj_Label
+        acc = np.sum(preds == Troj_Label)/float(rlogits.shape[0]) #TODO return "accuracy" of maximally activated neuron
+        return acc, adv, rdelta, rcon_mask, Troj_Label #if Pred always not equal to troj label, then perfect attach success?? Is troj+label the source class or target class?
 
 def re_mask(neuron_dict, layers, images, ExperimentName):
     validated_results = []
@@ -599,7 +599,7 @@ def re_mask(neuron_dict, layers, images, ExperimentName):
             for i  in range(mask_multi_start):
                 variables1 = setup_model(optz_option, weights_file, Troj_Layer, Troj_next_Layer)
                 variables2 = define_graph(optz_option, Troj_Layer, Troj_Neuron, Troj_next_Layer, Troj_next_Neuron, variables1, Troj_size)
-                acc, rimg, rdelta, rmask,Troj_Label = reverse_engineer(optz_option, images, weights_file, Troj_Layer, Troj_Neuron, Troj_next_Layer, Troj_next_Neuron, Troj_Label, variables2, RE_img, RE_delta, RE_mask, Troj_size)
+                acc, rimg, rdelta, rmask,Troj_Label = reverse_engineer(optz_option, images, weights_file, Troj_Layer, Troj_Neuron, Troj_next_Layer, Troj_next_Neuron, Troj_Label, variables2, RE_img, RE_delta, RE_mask, Troj_size) # Troj_label is used as input to this function.
                 # print('Acc', acc)
                 if Print_Level > 0:
                     print('RE mask', Troj_Layer, Troj_Neuron, 'Label', Troj_Label,'RE acc', acc)
@@ -947,7 +947,7 @@ if __name__ == '__main__':
     all_ps = sample_neuron(processed_test_xs, test_ys, model, maxes)
     neuron_dict = read_all_ps(config['model_file'], all_ps, top_k = top_n_neurons)
     print('Compromised Neuron Candidates (Layer, Neuron, Target_Label)', neuron_dict)
-"""
+## add back block comment here if needed
     # sys.exit()
 
     # neuron_dict['./models/nin_trojan_filter_2_3.h5'] = [('conv2d_4', 20, 0)]
