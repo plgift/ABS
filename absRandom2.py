@@ -946,7 +946,7 @@ if __name__ == '__main__':
     neuron_dict = {}
 
     maxes = check_values(processed_test_xs, test_ys, model)
-    all_ps = sample_neuron(processed_test_xs, test_ys, model, maxes)
+    all_ps,allneurons = sample_neuron(processed_test_xs, test_ys, model, maxes)
     neuron_dict = read_all_ps(config['modelfilename'], all_ps, top_k = top_n_neurons)
     print('Compromised Neuron Candidates (Layer, Neuron, Target_Label)', neuron_dict)
 ## add back block comment here if needed

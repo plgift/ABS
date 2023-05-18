@@ -212,7 +212,7 @@ def find_min_max(model_name, all_ps, cut_val=20, top_k = 10):
     max_vals = []
     n_classes = 0
     n_samples = 0
-    for k in sorted(all_ps.keys()): # two example keys: ((8, 43), u'conv2d_1', 97), ((5, 30), u'conv2d_8', 5) whichis image_name, layer, neuron+nt*batchsize
+    for k in sorted(all_ps.keys()): #two example keys: ((8, 43), u'conv2d_1', 97), ((5, 30), u'conv2d_8', 5) whichis image_name, layer, neuron+nt*batchsize
         all_ps[k] = all_ps[k][:, :cut_val]
         n_classes = all_ps[k].shape[0]
         n_samples = all_ps[k].shape[1]
@@ -962,7 +962,7 @@ if __name__ == '__main__':
     neuron_dict = {}
 
     maxes = check_values(processed_test_xs, test_ys, model)
-    all_ps = sample_neuron(processed_test_xs, test_ys, model, maxes)
+    all_ps,allneurons = sample_neuron(processed_test_xs, test_ys, model, maxes)
     neuron_dict = read_all_ps(config['modelFileName'], all_ps, top_k = top_n_neurons)
     print('Compromised Neuron Candidates (Layer, Neuron, Target_Label)', neuron_dict)
 
