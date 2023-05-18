@@ -142,6 +142,7 @@ def sample_neuron(images, labels, model, mvs):
     n_samples = config['n_samples']
     batch_size = config['samp_batch_size']
     n_images = images.shape[0]
+    allneurons=[]
     if Print_Level > 0:
         print('sampling n imgs', n_images)
 
@@ -197,21 +198,21 @@ def sample_neuron(images, labels, model, mvs):
             for neuron in range(batch_size):
                 tps = fps[neuron*n_samples*n_images:(neuron+1)*n_samples*n_images]
                 for img_i in range(n_images):
-                    img_name = (labels[img_i], img_i)
+                    img_name = (labels[img_i], img_i)#<<-- THIS 
                     ps_key= (img_name, model.layers[hl_idx].name, neuron+nt*batch_size)
                     ps = [tps[img_i+n_images*i] for i in range(n_samples)]
                     ps = np.asarray(ps)
                     ps = ps.T
                     all_ps[ps_key] = np.copy(ps)
-    return all_ps
-
+    allneurons=allneurons.append(n_neurons)
+    return all_ps, allneurons
 
 def find_min_max(model_name, all_ps, cut_val=20, top_k = 10):
     max_ps = {}
     max_vals = []
     n_classes = 0
     n_samples = 0
-    for k in sorted(all_ps.keys()):
+    for k in sorted(all_ps.keys()): # two example keys: ((8, 43), u'conv2d_1', 97), ((5, 30), u'conv2d_8', 5) whichis image_name, layer, neuron+nt*batchsize
         all_ps[k] = all_ps[k][:, :cut_val]
         n_classes = all_ps[k].shape[0]
         n_samples = all_ps[k].shape[1]
@@ -226,7 +227,7 @@ def find_min_max(model_name, all_ps, cut_val=20, top_k = 10):
         val = vs[ml] - vs[sml]
 
         max_vals.append(val)
-        max_ps[k] = (ml, val)
+        max_ps[k] = (ml, val)#computation of elevation difference? figure 13
     
     neuron_ks = []
     imgs = []
@@ -538,7 +539,7 @@ def reverse_engineer(optz_option, images, weights_file, Troj_Layer, Troj_Neuron,
                 rinner, rlogits, rloss, rloss1, rloss2, rtvloss, rrelu_loss1, rrelu_loss2, rmask_nz, rmask_cond1, rmask_loss, adv, rdelta,_  = \
                         sess.run((tinners, logits, loss, vloss1, vloss2, tvloss, relu_loss1, relu_loss2, mask_nz, mask_cond1, mask_loss, i_image, delta, train_op),\
                         {s_image:images})
-                if Print_Level > 1:
+                if Print_Level > 1: #print every 10th return.
                     if e % 10 == 0:
                         print('e', e, 'loss', rloss, 'target loss', rloss1, 'other loss', rloss2, 'tv loss', rtvloss)
                         print('next layer loss', 'target loss', rrelu_loss1, 'other loss', rrelu_loss2)
@@ -591,11 +592,12 @@ def reverse_engineer(optz_option, images, weights_file, Troj_Layer, Troj_Neuron,
         return acc, adv, rdelta, rcon_mask, Troj_Label
 
 def re_mask(neuron_dict, layers, images, ExperimentName):
+    # Re_mask is being computed on "images", which in this script is called ~line 973, with the small 1/3rd data. The output is "validated results"
     validated_results = []
     for key in sorted(neuron_dict.keys()):
         weights_file = key
         for task in neuron_dict[key]:
-            Troj_Layer, Troj_Neuron, Troj_Label = task
+            Troj_Layer, Troj_Neuron, Troj_Label = task #Troj_label is derived from neuron_dict...
             Troj_Neuron = int(Troj_Neuron)
             Troj_next_Layer = layers[layers.index(Troj_Layer) + 1]
             Troj_next_Neuron = Troj_Neuron
@@ -609,20 +611,23 @@ def re_mask(neuron_dict, layers, images, ExperimentName):
             
             max_acc = 0
             max_results = []
-            for i  in range(mask_multi_start):
+            for i  in range(mask_multi_start): #in provided config.json mask_multi_start=1)
                 variables1 = setup_model(optz_option, weights_file, Troj_Layer, Troj_next_Layer)
                 variables2 = define_graph(optz_option, Troj_Layer, Troj_Neuron, Troj_next_Layer, Troj_next_Neuron, variables1, Troj_size)
                 acc, rimg, rdelta, rmask,Troj_Label = reverse_engineer(optz_option, images, weights_file, Troj_Layer, Troj_Neuron, Troj_next_Layer, Troj_next_Neuron, Troj_Label, variables2, RE_img, RE_delta, RE_mask, Troj_size)
+                #TODO validate Troj_label is not changed by the reverse_engineering function?  it's also an input. , 
+                # TRUE, troj_label is not altered, it is what's being used to produce the ACC  of the rimg. 
+                # (internal to reverse_engineer function, the return values are called: acc, adv, rdelta, rcon_mask, Troj_Label)
                 # print('Acc', acc)
                 if Print_Level > 0:
                     print('RE mask', Troj_Layer, Troj_Neuron, 'Label', Troj_Label,'RE acc', acc)
                 K.clear_session()
                 tf.reset_default_graph()
-                if acc > max_acc:
+                if acc > max_acc: #in default config, we are taking the best of two loops. 
                     max_acc = acc
-                    max_results = (rimg, rdelta, rmask, Troj_Label, RE_img, RE_mask, RE_delta)
+                    max_results = (rimg, rdelta, rmask, Troj_Label, RE_img, RE_mask, RE_delta) # max accuracy is only computed for the tiny fraction of inputs xs.
             if max_acc >= reasr_bound - 0.2:
-                validated_results.append( max_results )
+                validated_results.append( max_results ) #TODO TODO add acc as an output here? 
         return validated_results
 
 
@@ -875,7 +880,7 @@ def filter_stamp(n_img, trigger):
     return r_img
 
 def test(weights_file, test_xs, result, mode='mask'):
-    
+    #outputs score, as percent of total images stamped with trigger, that when predicted, match the original label. 
     model = load_model(str(weights_file))
     func = K.function([model.input, K.learning_phase()], [model.layers[-2].output])
 
@@ -892,15 +897,15 @@ def test(weights_file, test_xs, result, mode='mask'):
     for i in range(len(t_images)):
         imageio.imsave(tdname + '/' + '{0}.png'.format(i), saved_images[i])
 
-    nt_images = cifar.deprocess(t_images).astype('uint8')
+    nt_images = cifar.deprocess(t_images).astype('uint8') #what is de process and pre-process doing to the stamped "t_images"
     rt_images = cifar.preprocess(nt_images)
     if Print_Level > 0:
         print(np.amin(rt_images), np.amax(rt_images))
     
-    yt = np.zeros(len(rt_images)).astype(np.int32) + tlabel
+    yt = np.zeros(len(rt_images)).astype(np.int32) + tlabel#create vector of true label from the results input file
     preds = model.predict(rt_images, verbose=0)
     preds = np.argmax(preds, axis=1) 
-    score = np.sum(yt == preds)/float(yt.shape[0])
+    score = np.sum(yt == preds)/float(yt.shape[0]) # (num correct predictions/number of samples)
     return score
 
 if __name__ == '__main__':
@@ -908,18 +913,18 @@ if __name__ == '__main__':
         ExperimentName= sys.argv[1]
         modelfilename=sys.argv[2]
         if not os.path.exists('./'+ExperimentName):
-            os.makedirs('./'+ExperimentName +'/deltas')
-            os.makedirs('./'+ExperimentName +'/imgs')
-            os.makedirs('./'+ExperimentName +'/masks')
-            os.makedirs('./'+ExperimentName +'/temp') #unclear this is needed but adding for now.
+            os.makedirs('./'+ExperimentName +'/'+modelfilename+'/deltas')
+            os.makedirs('./'+ExperimentName +'/'+modelfilename+'/imgs')
+            os.makedirs('./'+ExperimentName +'/'+modelfilename+'/masks')
+            os.makedirs('./'+ExperimentName +'/'+modelfilename+'/temp') #unclear this is needed but adding for now.
 
 # def main():
     if use_pickle:
         fxs, fys = pickle.load(open(seed_file, 'rb'))
     else:
         h5f = h5py.File(seed_file, 'r')
-        fxs = h5f['x'][:]
-        fys = h5f['y'][:]
+        fxs = h5f['x'][:]#images
+        fys = h5f['y'][:]#labels; 
     print('number of seed images', len(fys), fys.shape)
     fys = fys.reshape([-1])
     # if len(fys) == 10:
@@ -950,15 +955,15 @@ if __name__ == '__main__':
         Troj_Idx_dict[model.layers[i].name] = n_weights
 
     layers = [l.name for l in model.layers]
-    processed_xs = cifar.preprocess(xs)
-    processed_test_xs = cifar.preprocess(test_xs)
+    processed_xs = cifar.preprocess(xs) #this is a down select of the 50 images; only used in two places, the call to re_mask and re_filter. 
+    processed_test_xs = cifar.preprocess(test_xs)#all images go into this test set
     if Print_Level > 0:
         print('image range', np.amin(processed_test_xs), np.amax(processed_test_xs))
     neuron_dict = {}
 
     maxes = check_values(processed_test_xs, test_ys, model)
     all_ps = sample_neuron(processed_test_xs, test_ys, model, maxes)
-    neuron_dict = read_all_ps(config['model_file'], all_ps, top_k = top_n_neurons)
+    neuron_dict = read_all_ps(config['modelFileName'], all_ps, top_k = top_n_neurons)
     print('Compromised Neuron Candidates (Layer, Neuron, Target_Label)', neuron_dict)
 
     # sys.exit()
@@ -969,11 +974,16 @@ if __name__ == '__main__':
     maxreasr = 0
     reasr_info = []
 
-    results = re_mask(neuron_dict, layers, processed_xs,ExperimentName)
+    results = re_mask(neuron_dict, layers, processed_xs,ExperimentName) #the input to this function is the small subset 1/3rd of 50 images)
+    #re_mask could outpt the accuracy of  the reverse engineering function called within re_mask, which is the % of images that match the 
+    # troj_label/true label. currently it does not, but is readily available. 
+    # results is rimg, rdelta, rmask, Troj_Label, RE_img, RE_mask, RE_delta 
+    # is this indexed in some way by neuron_Dict? 
     if len(results) > 0:
         reasrs = []
         for result in results:
-            reasr = test(str(config['model_file']), test_xs, result)
+            reasr = test(str(config['modelFileName']), test_xs, result) #number of correct predictions as percentage of all samples
+            #outputs score (reasr), as percent of total (test_xs) images stamped with trigger, that when predicted, match the original label in result.
             reasrs.append(reasr)
             adv, rdelta, rmask, Troj_Label, RE_img, RE_mask, RE_delta = result
             rmask = rmask * rmask > mask_epsilon
@@ -993,7 +1003,7 @@ if __name__ == '__main__':
             reasr_info.append([reasr, 'mask', str(Troj_Label), RE_img, RE_mask, RE_delta])
             if reasr > maxreasr:
                 maxreasr = reasr
-        print(str(config['model_file']), 'mask check', max(reasrs))
+        print(str(config['modelFileName']), 'mask check', max(reasrs))
         
         if use_pickle:
             with open('./'+ExperimentName+'/results.pkl', 'wb') as f:
@@ -1006,6 +1016,8 @@ if __name__ == '__main__':
                 pickle.dump(maxreasr, f)
             with open('./'+ExperimentName+'/config.pkl', 'wb') as f:
                 pickle.dump(config, f)
+            with open('./'+ExperimentName+'/neuron_dict.pkl', 'wb') as f:
+                pickle.dump(neuron_dict, f)    
         if use_h5:
             with h5py.File('./'+ExperimentName+'/results.h5', "w") as f:
                 f.create_dataset('results', data=results)
@@ -1017,16 +1029,17 @@ if __name__ == '__main__':
                 f.create_dataset('maxreasr', data=maxreasr)
             with h5py.File('./'+ExperimentName+'/config.h5', "w") as f:
                 f.create_dataset('config', data=config)
-
+            with h5py.File('./'+ExperimentName+'/neuron_dict.h5', "w") as f:
+                f.create_dataset('neuron_dict', data=neuron_dict)
     else:
-        print(str(config['model_file']), 'mask check', 0)
+        print(str(config['modelFileName']), 'mask check', 0)
 
     # filter check 
     results = re_filter(neuron_dict, layers, processed_xs, ExperimentName)
     if len(results) > 0:
         reasrs = []
         for result in results:
-            reasr = test(str(config['model_file']), test_xs, result, 'filter')
+            reasr = test(str(config['modelFileName']), test_xs, result, 'filter')
             reasrs.append(reasr)
             adv, rdelta, Troj_Label, RE_img, RE_delta = result
             if reasr > reasr_bound:
@@ -1042,9 +1055,9 @@ if __name__ == '__main__':
             reasr_info.append([reasr, 'filter', str(Troj_Label), RE_img, RE_delta])
             if reasr > maxreasr:
                 maxreasr = reasr
-        print(str(config['model_file']), 'filter check', max(reasrs))
+        print(str(config['modelFileName']), 'filter check', max(reasrs))
     else:
-        print(str(config['model_file']), 'filter check', 0)
+        print(str(config['modelFileName']), 'filter check', 0)
     
     if use_pickle:
         with open('./'+ExperimentName+'/results.pkl', 'wb') as f:
@@ -1057,6 +1070,8 @@ if __name__ == '__main__':
             pickle.dump(maxreasr, f)
         with open('./'+ExperimentName+'/config.pkl', 'wb') as f:
             pickle.dump(config, f)
+        with open('./'+ExperimentName+'/neuron_dict.pkl', 'wb') as f:
+            pickle.dump(neuron_dict, f) 
     if use_h5:
         with h5py.File('./'+ExperimentName+'/results.h5', "w") as f:
             f.create_dataset('results', data=results)
@@ -1068,6 +1083,8 @@ if __name__ == '__main__':
             f.create_dataset('maxreasr', data=maxreasr)
         with h5py.File('./'+ExperimentName+'/config.h5', "w") as f:
             f.create_dataset('config', data=config)
+        with h5py.File('./'+ExperimentName+'/neuron_dict.h5', "w") as f:
+            f.create_dataset('neuron_dict', data=neuron_dict)
 
 
     #print(str(config['model_file']), 'both filter and mask check', maxreasr)

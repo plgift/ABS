@@ -19,7 +19,7 @@
     "samp_k": 8,
     "same_range": 0,
     "n_samples": 5,
-    "samp_batch_size": 8,
+    "samp_batch_size": 1,
     "top_n_neurons": 10,
 
     "_comment": "====RE Mask====",

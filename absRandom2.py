@@ -143,6 +143,7 @@ def sample_neuron(images, labels, model, mvs):
     n_samples = config['n_samples'] #default 5
     batch_size = config['samp_batch_size']#default 8
     n_images = images.shape[0]
+    allneurons=[]
     if Print_Level > 0:
         print('sampling n imgs', n_images)
 
@@ -204,7 +205,8 @@ def sample_neuron(images, labels, model, mvs):
                     ps = np.asarray(ps)
                     ps = ps.T
                     all_ps[ps_key] = np.copy(ps)# neuron dict is the key to all_ps.
-    return all_ps
+        allneurons=allneurons.append(n_neurons)
+    return all_ps, allneurons
 
 
 def find_min_max(model_name, all_ps, cut_val=20, top_k = 10):
@@ -220,7 +222,7 @@ def find_min_max(model_name, all_ps, cut_val=20, top_k = 10):
         nk = (k[1], k[2]) #layer, neuron
         neuron_ks.append(nk)
         imgs.append(k[0])
-        neuron_dict[model_name].append( (k[1], k[2], all_ps[k][0]) )# layer neuron image name
+        neuron_dict[model_name].append( (k[1], k[2]), k[0][1] )# layer neuron image name
     neuron_ks = list(set(neuron_ks))
     imgs = list(set(imgs))
     """ 
@@ -895,10 +897,10 @@ if __name__ == '__main__':
         ExperimentName= sys.argv[1]
         modelfilename=sys.argv[2]
         if not os.path.exists('./'+ExperimentName):
-            os.makedirs('./'+ExperimentName +'/deltas')
-            os.makedirs('./'+ExperimentName +'/imgs')
-            os.makedirs('./'+ExperimentName +'/masks')
-            os.makedirs('./'+ExperimentName +'/temp') #unclear this is needed but adding for now.
+            os.makedirs('./'+ExperimentName +'/'+modelfilename+'/deltas')
+            os.makedirs('./'+ExperimentName +'/'+modelfilename+'/imgs')
+            os.makedirs('./'+ExperimentName +'/'+modelfilename+'/masks')
+            os.makedirs('./'+ExperimentName +'/'+modelfilename+'/temp') #unclear this is needed but adding for now.
 
 # def main():
     if use_pickle:
@@ -945,7 +947,7 @@ if __name__ == '__main__':
 
     maxes = check_values(processed_test_xs, test_ys, model)
     all_ps = sample_neuron(processed_test_xs, test_ys, model, maxes)
-    neuron_dict = read_all_ps(config['model_file'], all_ps, top_k = top_n_neurons)
+    neuron_dict = read_all_ps(config['modelfilename'], all_ps, top_k = top_n_neurons)
     print('Compromised Neuron Candidates (Layer, Neuron, Target_Label)', neuron_dict)
 ## add back block comment here if needed
     # sys.exit()
@@ -960,7 +962,7 @@ if __name__ == '__main__':
     if len(results) > 0:
         reasrs = []
         for result in results:
-            reasr = test(str(config['model_file']), test_xs, result)
+            reasr = test(str(config['modelfilename']), test_xs, result)
             reasrs.append(reasr)
             adv, rdelta, rmask, Troj_Label, RE_img, RE_mask, RE_delta = result
             rmask = rmask * rmask > mask_epsilon
@@ -980,7 +982,7 @@ if __name__ == '__main__':
             reasr_info.append([reasr, 'mask', str(Troj_Label), RE_img, RE_mask, RE_delta])
             if reasr > maxreasr:
                 maxreasr = reasr
-        print(str(config['model_file']), 'mask check', max(reasrs))
+        print(str(config['modelfilename']), 'mask check', max(reasrs))
         
         if use_pickle:
             with open('./'+ExperimentName+'/results.pkl', 'wb') as f:
@@ -1006,14 +1008,14 @@ if __name__ == '__main__':
                 f.create_dataset('config', data=config)
 
     else:
-        print(str(config['model_file']), 'mask check', 0)
+        print(str(config['modelfilename']), 'mask check', 0)
 
     # filter check 
     results = re_filter(neuron_dict, layers, processed_xs, ExperimentName)
     if len(results) > 0:
         reasrs = []
         for result in results:
-            reasr = test(str(config['model_file']), test_xs, result, 'filter')
+            reasr = test(str(config['modelfilename']), test_xs, result, 'filter')
             reasrs.append(reasr)
             adv, rdelta, Troj_Label, RE_img, RE_delta = result
             if reasr > reasr_bound:
@@ -1029,9 +1031,9 @@ if __name__ == '__main__':
             reasr_info.append([reasr, 'filter', str(Troj_Label), RE_img, RE_delta])
             if reasr > maxreasr:
                 maxreasr = reasr
-        print(str(config['model_file']), 'filter check', max(reasrs))
+        print(str(config['modelfilename']), 'filter check', max(reasrs))
     else:
-        print(str(config['model_file']), 'filter check', 0)
+        print(str(config['modelfilename']), 'filter check', 0)
     
     if use_pickle:
         with open('./'+ExperimentName+'/results.pkl', 'wb') as f:
