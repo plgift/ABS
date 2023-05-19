@@ -143,7 +143,7 @@ def sample_neuron(images, labels, model, mvs):
     n_samples = config['n_samples'] #default 5
     batch_size = config['samp_batch_size']#default 8
     n_images = images.shape[0]
-    allneurons=[]
+    #allneurons=[]
     if Print_Level > 0:
         print('sampling n imgs', n_images)
 
@@ -205,8 +205,8 @@ def sample_neuron(images, labels, model, mvs):
                     ps = np.asarray(ps)
                     ps = ps.T
                     all_ps[ps_key] = np.copy(ps)# neuron dict is the key to all_ps.
-        allneurons=allneurons.append(n_neurons)
-    return all_ps, allneurons
+        #allneurons=allneurons.append(n_neurons)
+    return all_ps
 
 
 def find_min_max(model_name, all_ps, cut_val=20, top_k = 10):
@@ -946,7 +946,7 @@ if __name__ == '__main__':
     neuron_dict = {}
 
     maxes = check_values(processed_test_xs, test_ys, model)
-    all_ps,allneurons = sample_neuron(processed_test_xs, test_ys, model, maxes)
+    all_ps = sample_neuron(processed_test_xs, test_ys, model, maxes)
     neuron_dict = read_all_ps(config['modelfilename'], all_ps, top_k = top_n_neurons)
     print('Compromised Neuron Candidates (Layer, Neuron, Target_Label)', neuron_dict)
 ## add back block comment here if needed
@@ -995,6 +995,8 @@ if __name__ == '__main__':
                 pickle.dump(maxreasr, f)
             with open('./'+ExperimentName+'/config.pkl', 'wb') as f:
                 pickle.dump(config, f)
+            with open('./'+ExperimentName+'/neuron_dict.pkl', 'wb') as f:
+            pickle.dump(neuron_dict, f) 
         if use_h5:
             with h5py.File('./'+ExperimentName+'/results.h5', "w") as f:
                 f.create_dataset('results', data=results)
@@ -1006,6 +1008,8 @@ if __name__ == '__main__':
                 f.create_dataset('maxreasr', data=maxreasr)
             with h5py.File('./'+ExperimentName+'/config.h5', "w") as f:
                 f.create_dataset('config', data=config)
+            with h5py.File('./'+ExperimentName+'/neuron_dict.h5', "w") as f:
+                f.create_dataset('neuron_dict', data=neuron_dict)
 
     else:
         print(str(config['modelfilename']), 'mask check', 0)
@@ -1046,6 +1050,8 @@ if __name__ == '__main__':
             pickle.dump(maxreasr, f)
         with open('./'+ExperimentName+'/config.pkl', 'wb') as f:
             pickle.dump(config, f)
+        with open('./'+ExperimentName+'/neuron_dict.pkl', 'wb') as f:
+            pickle.dump(neuron_dict, f) 
     if use_h5:
         with h5py.File('./'+ExperimentName+'/results.h5', "w") as f:
             f.create_dataset('results', data=results)
@@ -1057,6 +1063,8 @@ if __name__ == '__main__':
             f.create_dataset('maxreasr', data=maxreasr)
         with h5py.File('./'+ExperimentName+'/config.h5', "w") as f:
             f.create_dataset('config', data=config)
+        with h5py.File('./'+ExperimentName+'/neuron_dict.h5', "w") as f:
+            f.create_dataset('neuron_dict', data=neuron_dict)
 
 
     #print(str(config['model_file']), 'both filter and mask check', maxreasr)
