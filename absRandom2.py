@@ -947,7 +947,7 @@ if __name__ == '__main__':
 
     maxes = check_values(processed_test_xs, test_ys, model)
     all_ps = sample_neuron(processed_test_xs, test_ys, model, maxes)
-    neuron_dict = read_all_ps(config['modelfilename'], all_ps, top_k = top_n_neurons)
+    neuron_dict = read_all_ps(config['modelFileName'], all_ps, top_k = top_n_neurons)
     print('Compromised Neuron Candidates (Layer, Neuron, Target_Label)', neuron_dict)
 ## add back block comment here if needed
     # sys.exit()
@@ -962,7 +962,7 @@ if __name__ == '__main__':
     if len(results) > 0:
         reasrs = []
         for result in results:
-            reasr = test(str(config['modelfilename']), test_xs, result)
+            reasr = test(str(config['modelFileName']), test_xs, result)
             reasrs.append(reasr)
             adv, rdelta, rmask, Troj_Label, RE_img, RE_mask, RE_delta = result
             rmask = rmask * rmask > mask_epsilon
@@ -982,8 +982,8 @@ if __name__ == '__main__':
             reasr_info.append([reasr, 'mask', str(Troj_Label), RE_img, RE_mask, RE_delta])
             if reasr > maxreasr:
                 maxreasr = reasr
-        print(str(config['modelfilename']), 'mask check', max(reasrs))
-        
+        print(str(config['modelFileName']), 'mask check', max(reasrs))
+        #comment
         if use_pickle:
             with open('./'+ExperimentName+'/results.pkl', 'wb') as f:
                 pickle.dump(results, f)
@@ -1012,14 +1012,14 @@ if __name__ == '__main__':
                 f.create_dataset('neuron_dict', data=neuron_dict)
 
     else:
-        print(str(config['modelfilename']), 'mask check', 0)
+        print(str(config['modelFileName']), 'mask check', 0)
 
     # filter check 
     results = re_filter(neuron_dict, layers, processed_xs, ExperimentName)
     if len(results) > 0:
         reasrs = []
         for result in results:
-            reasr = test(str(config['modelfilename']), test_xs, result, 'filter')
+            reasr = test(str(config['modelFileName']), test_xs, result, 'filter')
             reasrs.append(reasr)
             adv, rdelta, Troj_Label, RE_img, RE_delta = result
             if reasr > reasr_bound:
@@ -1035,9 +1035,9 @@ if __name__ == '__main__':
             reasr_info.append([reasr, 'filter', str(Troj_Label), RE_img, RE_delta])
             if reasr > maxreasr:
                 maxreasr = reasr
-        print(str(config['modelfilename']), 'filter check', max(reasrs))
+        print(str(config['modelFileName']), 'filter check', max(reasrs))
     else:
-        print(str(config['modelfilename']), 'filter check', 0)
+        print(str(config['modelFileName']), 'filter check', 0)
     
     if use_pickle:
         with open('./'+ExperimentName+'/results.pkl', 'wb') as f:
