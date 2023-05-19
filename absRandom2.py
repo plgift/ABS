@@ -996,7 +996,7 @@ if __name__ == '__main__':
             with open('./'+ExperimentName+'/config.pkl', 'wb') as f:
                 pickle.dump(config, f)
             with open('./'+ExperimentName+'/neuron_dict.pkl', 'wb') as f:
-            pickle.dump(neuron_dict, f) 
+                pickle.dump(neuron_dict, f) 
         if use_h5:
             with h5py.File('./'+ExperimentName+'/results.h5', "w") as f:
                 f.create_dataset('results', data=results)
