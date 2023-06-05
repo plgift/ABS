@@ -805,7 +805,7 @@ def filter_stamp(n_img, trigger):
         r_img = sess.run(i_image, {t_image: n_img, tdelta:trigger})
     return r_img
 
-def test(model, model_type, test_xs, result) #, scratch_dirpath, mode='mask'):
+def test(model, model_type, test_xs, result): #, scratch_dirpath, mode='mask'):
     
     re_batch_size = config['re_batch_size']
     if model_type == 'DenseNet':
