@@ -743,7 +743,7 @@ def reverse_engineer(model_type, model, children, oimages, olabels, weights_file
 
     return facc, adv, delta, con_mask, Troj_Label2
 
-def re_mask(model_type, model, neuron_dict, children, images, labels, scratch_dirpath, re_epochs):
+def re_mask(model_type, model, neuron_dict, children, images, labels, result_filepath, re_epochs):
     validated_results = []
     for key in sorted(neuron_dict.keys()):
         weights_file = key
@@ -752,9 +752,9 @@ def re_mask(model_type, model, neuron_dict, children, images, labels, scratch_di
             Troj_Neuron = int(Troj_Neuron)
             Troj_Layer = int(Troj_Layer.split('_')[1])
 
-            RE_img = os.path.join(scratch_dirpath,'imgs', '{0}_model_{1}_{2}_{3}_{4}.png'.format(    weights_file.split('/')[-2], Troj_Layer, Troj_Neuron, Troj_size, samp_label))
-            RE_mask = os.path.join(scratch_dirpath,'masks', '{0}_model_{1}_{2}_{3}_{4}.pkl'.format(  weights_file.split('/')[-2], Troj_Layer, Troj_Neuron, Troj_size, samp_label))
-            RE_delta = os.path.join(scratch_dirpath,'deltas', '{0}_model_{1}_{2}_{3}_{4}.pkl'.format(weights_file.split('/')[-2], Troj_Layer, Troj_Neuron, Troj_size, samp_label))
+            RE_img = os.path.join(result_filepath,'imgs', '{0}_model_{1}_{2}_{3}_{4}.png'.format(    weights_file.split('/')[-2], Troj_Layer, Troj_Neuron, Troj_size, samp_label))
+            RE_mask = os.path.join(result_filepath,'masks', '{0}_model_{1}_{2}_{3}_{4}.pkl'.format(  weights_file.split('/')[-2], Troj_Layer, Troj_Neuron, Troj_size, samp_label))
+            RE_delta = os.path.join(result_filepath,'deltas', '{0}_model_{1}_{2}_{3}_{4}.pkl'.format(weights_file.split('/')[-2], Troj_Layer, Troj_Neuron, Troj_size, samp_label))
             
             max_acc = 0
             max_results = []
@@ -805,7 +805,7 @@ def filter_stamp(n_img, trigger):
         r_img = sess.run(i_image, {t_image: n_img, tdelta:trigger})
     return r_img
 
-def test(model, model_type, test_xs, result, scratch_dirpath, mode='mask'):
+def test(model, model_type, test_xs, result) #, scratch_dirpath, mode='mask'):
     
     re_batch_size = config['re_batch_size']
     if model_type == 'DenseNet':
@@ -860,10 +860,10 @@ def main(model_filepath, result_filepath, scratch_dirpath, examples_dirpath, mod
     print('examples_dirpath = {}'.format(examples_dirpath))
 
     # create dirs
-    os.system('mkdir -p {0}'.format(os.path.join(scratch_dirpath, 'imgs')))
-    os.system('mkdir -p {0}'.format(os.path.join(scratch_dirpath, 'masks')))
-    os.system('mkdir -p {0}'.format(os.path.join(scratch_dirpath, 'temps')))
-    os.system('mkdir -p {0}'.format(os.path.join(scratch_dirpath, 'deltas')))
+    os.system('mkdir -p {0}'.format(os.path.join(result_filepath+'/'+ ExperimentName +'/'+modelName, '/imgs')))
+    os.system('mkdir -p {0}'.format(os.path.join(result_filepath+'/'+ ExperimentName +'/'+modelName, '/masks')))
+    os.system('mkdir -p {0}'.format(os.path.join(result_filepath+'/'+ ExperimentName +'/'+modelName, '/temps')))
+    os.system('mkdir -p {0}'.format(os.path.join(result_filepath+'/'+ ExperimentName +'/'+modelName, '/deltas')))
 
     fns = [os.path.join(examples_dirpath, fn) for fn in os.listdir(examples_dirpath) if fn.endswith(example_img_format)]
     random.shuffle(fns)
@@ -1008,14 +1008,14 @@ def main(model_filepath, result_filepath, scratch_dirpath, examples_dirpath, mod
     print('Compromised Neuron Candidates (Layer, Neuron, Target_Label)', neuron_dict)
 
     sample_end = time.time()
-
-    results = re_mask(model_type, model, neuron_dict, children, xs, ys, scratch_dirpath, re_epochs)
+    thepath=result_filepath+'/'+ExperimentName+'/'+ modelName 
+    results = re_mask(model_type, model, neuron_dict, children, xs, ys, thepath, re_epochs)
     reasr_info = []
     reasrs = []
     if len(results) > 0:
         reasrs = []
         for result in results:
-            reasr = test(model, model_type, test_xs, result, scratch_dirpath, result)
+            reasr = test(model, model_type, test_xs, result) # scratch_dirpath, result)
             reasrs.append(reasr)
             adv, rdelta, rmask, optz_label, RE_img, RE_mask, RE_delta, samp_label, acc = result
             rmask = rmask * rmask > mask_epsilon
@@ -1045,7 +1045,7 @@ def main(model_filepath, result_filepath, scratch_dirpath, examples_dirpath, mod
         output =     1e-1
     print('max reasr', max_reasr, 'output', output)
     # Write Outputs
-    with open(result_filepath+'/'+ExperimentName+'/'+ modelName+', 'w') as f:
+    with open(result_filepath+'/'+ExperimentName+'/'+ modelName + '/TrojResult.txt','w') as f:
         f.write('{0}'.format(output))
 
     if use_pickle:
