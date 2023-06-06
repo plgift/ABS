@@ -865,10 +865,10 @@ def main(model_filepath, result_filepath, scratch_dirpath, examples_dirpath, mod
     #os.system('mkdir -p {0}'.format(os.path.join(result_filepath+'/'+ ExperimentName +'/'+modelName, '/temps')))
     #os.system('mkdir -p {0}'.format(os.path.join(result_filepath+'/'+ ExperimentName +'/'+modelName, '/deltas')))
     if not os.path.exists(result_filepath+ '/'+ExperimentName+'/'+model_filepath):
-            os.makedirs(result_filepath+'/'+ExperimentName +'/'+modelfilename+'/deltas')
-            os.makedirs(result_filepath+'/'+ExperimentName +'/'+modelfilename+'/imgs')
-            os.makedirs(result_filepath+'/'+ExperimentName +'/'+modelfilename+'/masks')
-            os.makedirs(result_filepath+'/'+ExperimentName +'/'+modelfilename+'/temp')
+            os.makedirs(result_filepath+'/'+ExperimentName +'/'+model_filepath+'/deltas')
+            os.makedirs(result_filepath+'/'+ExperimentName +'/'+model_filepath+'/imgs')
+            os.makedirs(result_filepath+'/'+ExperimentName +'/'+model_filepath+'/masks')
+            os.makedirs(result_filepath+'/'+ExperimentName +'/'+model_filepath+'/temp')
 
     fns = [os.path.join(examples_dirpath, fn) for fn in os.listdir(examples_dirpath) if fn.endswith(example_img_format)]
     random.shuffle(fns)
