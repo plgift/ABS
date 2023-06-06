@@ -1,6 +1,7 @@
 import numpy as np
 import os
 import argparse
+import pathlib
 
 # os.environ["OMP_NUM_THREADS"] = "4" # export OMP_NUM_THREADS=4
 # os.environ["OPENBLAS_NUM_THREADS"] = "4" # export OPENBLAS_NUM_THREADS=4
@@ -1050,9 +1051,12 @@ def main(model_filepath, result_filepath, scratch_dirpath, examples_dirpath, mod
         output =     1e-1
     print('max reasr', max_reasr, 'output', output)
     # Write Outputs
-    if not os.path.exists(result_filepath+'/'+ExperimentName+'/'+ modelName + '/TrojResult.txt'):
-        open(result_filepath+'/'+ExperimentName+'/'+ modelName + '/TrojResult.txt','x')
+    #if not os.path.exists(result_filepath+'/'+ExperimentName+'/'+ modelName + '/TrojResult.txt'):
+     #   open(result_filepath+'/'+ExperimentName+'/'+ modelName + '/TrojResult.txt','x')
 
+    filePath = pathlib.Path(result_filepath+'/'+ExperimentName+'/'+ modelName + '/TrojResult.txt')
+
+    filePath.touch(exist_ok= True)
     with open(result_filepath+'/'+ExperimentName+'/'+ modelName + '/TrojResult.txt','w') as f:
         f.write('{0}'.format(output))
 
