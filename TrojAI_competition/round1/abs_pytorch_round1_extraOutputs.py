@@ -860,10 +860,15 @@ def main(model_filepath, result_filepath, scratch_dirpath, examples_dirpath, mod
     print('examples_dirpath = {}'.format(examples_dirpath))
 
     # create dirs
-    os.system('mkdir -p {0}'.format(os.path.join(result_filepath+'/'+ ExperimentName +'/'+modelName, '/imgs')))
-    os.system('mkdir -p {0}'.format(os.path.join(result_filepath+'/'+ ExperimentName +'/'+modelName, '/masks')))
-    os.system('mkdir -p {0}'.format(os.path.join(result_filepath+'/'+ ExperimentName +'/'+modelName, '/temps')))
-    os.system('mkdir -p {0}'.format(os.path.join(result_filepath+'/'+ ExperimentName +'/'+modelName, '/deltas')))
+    #os.system('mkdir -p {0}'.format(os.path.join(result_filepath+'/'+ ExperimentName +'/'+modelName, '/imgs')))
+    #os.system('mkdir -p {0}'.format(os.path.join(result_filepath+'/'+ ExperimentName +'/'+modelName, '/masks')))
+    #os.system('mkdir -p {0}'.format(os.path.join(result_filepath+'/'+ ExperimentName +'/'+modelName, '/temps')))
+    #os.system('mkdir -p {0}'.format(os.path.join(result_filepath+'/'+ ExperimentName +'/'+modelName, '/deltas')))
+    if not os.path.exists(result_filepath+ '/'+ExperimentName+'/'+model_filepath):
+            os.makedirs(result_filepath+'/'+ExperimentName +'/'+modelfilename+'/deltas')
+            os.makedirs(result_filepath+'/'+ExperimentName +'/'+modelfilename+'/imgs')
+            os.makedirs(result_filepath+'/'+ExperimentName +'/'+modelfilename+'/masks')
+            os.makedirs(result_filepath+'/'+ExperimentName +'/'+modelfilename+'/temp')
 
     fns = [os.path.join(examples_dirpath, fn) for fn in os.listdir(examples_dirpath) if fn.endswith(example_img_format)]
     random.shuffle(fns)
@@ -1045,6 +1050,9 @@ def main(model_filepath, result_filepath, scratch_dirpath, examples_dirpath, mod
         output =     1e-1
     print('max reasr', max_reasr, 'output', output)
     # Write Outputs
+    if not os.path.exists(result_filepath+'/'+ExperimentName+'/'+ modelName + '/TrojResult.txt'):
+        open(result_filepath+'/'+ExperimentName+'/'+ modelName + '/TrojResult.txt','x')
+
     with open(result_filepath+'/'+ExperimentName+'/'+ modelName + '/TrojResult.txt','w') as f:
         f.write('{0}'.format(output))
 
