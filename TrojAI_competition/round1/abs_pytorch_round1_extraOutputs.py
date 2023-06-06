@@ -1054,10 +1054,10 @@ def main(model_filepath, result_filepath, scratch_dirpath, examples_dirpath, mod
     #if not os.path.exists(result_filepath+'/'+ExperimentName+'/'+ modelName + '/TrojResult.txt'):
      #   open(result_filepath+'/'+ExperimentName+'/'+ modelName + '/TrojResult.txt','x')
 
-    filePath = pathlib.Path(result_filepath+'/'+ExperimentName+'/'+ modelName + '/TrojResult.txt')
+    filePath = pathlib.Path(result_filepath)#+'/'+ExperimentName+'/'+ modelName + '/TrojResult.txt')
 
     filePath.touch(exist_ok= True)
-    with open(result_filepath+'/'+ExperimentName+'/'+ modelName + '/TrojResult.txt','w') as f:
+    with open(result_filepath,'w') as f:
         f.write('{0}'.format(output))
 
     if use_pickle:
