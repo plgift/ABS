@@ -1054,13 +1054,15 @@ def main(model_filepath, result_filepath, scratch_dirpath, examples_dirpath, mod
     #if not os.path.exists(result_filepath+'/'+ExperimentName+'/'+ modelName + '/TrojResult.txt'):
      #   open(result_filepath+'/'+ExperimentName+'/'+ modelName + '/TrojResult.txt','x')
 
-    filePath = pathlib.Path(result_filepath)#+'/'+ExperimentName+'/'+ modelName + '/TrojResult.txt')
+    #filePath = pathlib.Path(result_filepath)#+'/'+ExperimentName+'/'+ modelName + '/TrojResult.txt')
 
-    filePath.touch(exist_ok= True)
-    with open(result_filepath,'w') as f:
-        f.write('{0}'.format(output))
+    #filePath.touch(exist_ok= True)
+    #with open(result_filepath,'w') as f:
+    #    f.write('{0}'.format(output))
 
     if use_pickle:
+            with open(result_filepath+'/'+ExperimentName+'/'+ modelName+'/output.pkl', 'wb') as f:
+                pickle.dump(output, f)
             with open(result_filepath+'/'+ExperimentName+'/'+ modelName+'/results.pkl', 'wb') as f:
                 pickle.dump(results, f)
             with open(result_filepath+'/'+ExperimentName+'/'+ modelName+'/reasrs.pkl', 'wb') as f:
@@ -1074,6 +1076,8 @@ def main(model_filepath, result_filepath, scratch_dirpath, examples_dirpath, mod
             with open(result_filepath+'/'+ExperimentName+'/'+ modelName+'/neuron_dict.pkl', 'wb') as f:
                 pickle.dump(neuron_dict, f) 
     if use_h5:
+            with h5py.File('./'+ExperimentName+'/'+ modelName+'/output.h5', "w") as f:
+                f.create_dataset('output', data=output)
             with h5py.File('./'+ExperimentName+'/'+ modelName+'/results.h5', "w") as f:
                 f.create_dataset('results', data=results)
             with h5py.File('./'+ExperimentName+'/'+ modelName+'/reasrs.h5', "w") as f:
