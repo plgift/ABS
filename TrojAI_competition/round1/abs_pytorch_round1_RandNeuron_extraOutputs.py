@@ -1060,7 +1060,7 @@ def main(model_filepath, result_filepath, scratch_dirpath, examples_dirpath, mod
                 pickle.dump(config, f)
             with open(result_filepath+'/'+ExperimentName+'/'+ modelName+'/neuron_dict.pkl', 'wb') as f:
                 pickle.dump(neuron_dict, f) 
-        if use_h5:
+    if use_h5:
             with h5py.File('./'+ExperimentName+'/'+ modelName+'/results.h5', "w") as f:
                 f.create_dataset('output', data=output)
             with h5py.File('./'+ExperimentName+'/'+ modelName+'/results.h5', "w") as f:
