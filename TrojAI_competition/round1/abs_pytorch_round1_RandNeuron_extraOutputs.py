@@ -1098,4 +1098,4 @@ if __name__ == "__main__":
     """
     args = parser.parse_args()
 
-    main(args.model_filepath, args.result_filepath, args.scratch_dirpath, args.examples_dirpath)
+    main(args.model_filepath, args.result_filepath, args.scratch_dirpath, args.examples_dirpath, args.modelName, args.ExperimentName)
