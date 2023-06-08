@@ -2,7 +2,7 @@ import abs_pytorch_round1_extraOutputs
 def main(model_filepath, result_filepath, scratch_dirpath, examples_dirpath, modelName, ExperimentName, example_img_format='png',):
     with open("/mnt/nfs/ml-shared/trojai_data/ABS/TrojAI_competition/round1/denseResNetModelNames50.txt") as f:
           modelnums=f.read().splitlines()
-        
+          print(modelnums)  
     for i in modelnums:
             try:
                  print("helloooooo")
