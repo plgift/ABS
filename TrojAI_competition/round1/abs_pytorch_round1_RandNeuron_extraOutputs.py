@@ -368,6 +368,10 @@ def find_min_max(model_name, all_ps, sample_layers, cut_val=20, top_k = 10):
         layer = k[0]
         neuron = k[1]
         label = min_ps[k][0]
+        allns += 1
+        neuron_dict[model_name].append( (layer, neuron, min_ps[k][0]) )
+        if allns >= top_k:
+            break
     """
             allns += 1
             neuron_dict[model_name].append( (layer, neuron, min_ps[k][0]) )
@@ -396,10 +400,8 @@ def find_min_max(model_name, all_ps, sample_layers, cut_val=20, top_k = 10):
                 if Print_Level > 1:
                     print(min_ps[k][3])
                     """
-            allns += 1
-            neuron_dict[model_name].append( (layer, neuron, min_ps[k][0]) )
-        if allns >= top_k:
-            break
+
+       
 
     return neuron_dict, max_sampling_val
 
@@ -848,10 +850,11 @@ def main(model_filepath, result_filepath, scratch_dirpath, examples_dirpath, mod
     print('scratch_dirpath = {}'.format(scratch_dirpath))
     print('examples_dirpath = {}'.format(examples_dirpath))
 
-    os.makedirs()
-    os.makedirs()
-    os.makedirs()
-    os.makedirs()
+    if not os.path.exists(result_filepath+ '/'+ExperimentName+'/'+modelName):
+            os.makedirs(result_filepath+'/'+ExperimentName +'/'+modelName+'/deltas')
+            os.makedirs(result_filepath+'/'+ExperimentName +'/'+modelName+'/imgs')
+            os.makedirs(result_filepath+'/'+ExperimentName +'/'+modelName+'/masks')
+            os.makedirs(result_filepath+'/'+ExperimentName +'/'+modelName+'/temp')
 
     # create dirs
     #os.system('mkdir -p {0}'.format(os.path.join(scratch_dirpath, 'imgs')))
