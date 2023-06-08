@@ -848,11 +848,16 @@ def main(model_filepath, result_filepath, scratch_dirpath, examples_dirpath, mod
     print('scratch_dirpath = {}'.format(scratch_dirpath))
     print('examples_dirpath = {}'.format(examples_dirpath))
 
+    os.makedirs()
+    os.makedirs()
+    os.makedirs()
+    os.makedirs()
+
     # create dirs
-    os.system('mkdir -p {0}'.format(os.path.join(scratch_dirpath, 'imgs')))
-    os.system('mkdir -p {0}'.format(os.path.join(scratch_dirpath, 'masks')))
-    os.system('mkdir -p {0}'.format(os.path.join(scratch_dirpath, 'temps')))
-    os.system('mkdir -p {0}'.format(os.path.join(scratch_dirpath, 'deltas')))
+    #os.system('mkdir -p {0}'.format(os.path.join(scratch_dirpath, 'imgs')))
+    #os.system('mkdir -p {0}'.format(os.path.join(scratch_dirpath, 'masks')))
+    #os.system('mkdir -p {0}'.format(os.path.join(scratch_dirpath, 'temps')))
+    #os.system('mkdir -p {0}'.format(os.path.join(scratch_dirpath, 'deltas')))
 
     fns = [os.path.join(examples_dirpath, fn) for fn in os.listdir(examples_dirpath) if fn.endswith(example_img_format)]
     random.shuffle(fns)

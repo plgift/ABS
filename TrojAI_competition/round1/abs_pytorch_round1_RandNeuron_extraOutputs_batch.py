@@ -1,10 +1,10 @@
-import abs_pytorch_round1_extraOutputs
+import abs_pytorch_round1_RandNeuron_extraOutputs
 def main(model_filepath, result_filepath, scratch_dirpath, examples_dirpath, modelName, ExperimentName, example_img_format='png',):
     with open("/home/nnichols/Documents/Projects/trojai/ABS/TrojAI_competition/round1/denseResNetModelNames50.txt") as f:
           modelnums=f.read().splitlines()
         
     for i in modelnums:
-            abs_pytorch_round1_extraOutputs(model_filepath+i+'/model.pt', result_filepath, scratch_dirpath, examples_dirpath +i+'/example_data/', i , ExperimentName)
+            abs_pytorch_round1_RandNeuron_extraOutputs(model_filepath+i+'/model.pt', result_filepath, scratch_dirpath, examples_dirpath +i+'/example_data/', i , ExperimentName)
 
 
 
