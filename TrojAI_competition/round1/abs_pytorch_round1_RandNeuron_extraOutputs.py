@@ -1042,10 +1042,12 @@ def main(model_filepath, result_filepath, scratch_dirpath, examples_dirpath, mod
         output =     1e-1
     print('max reasr', max_reasr, 'output', output)
     # Write Outputs
-    with open(result_filepath+'/'+ExperimentName+'/'+ modelName+', 'w') as f:
-        f.write('{0}'.format(output))
+    #with open(result_filepath+'/'+ExperimentName+'/'+ modelName+', 'w') as f:
+     #   f.write('{0}'.format(output))
 
     if use_pickle:
+            with open(result_filepath+'/'+ExperimentName+'/'+ modelName+'/output.pkl', 'wb') as f:
+                pickle.dump(output, f)
             with open(result_filepath+'/'+ExperimentName+'/'+ modelName+'/results.pkl', 'wb') as f:
                 pickle.dump(results, f)
             with open(result_filepath+'/'+ExperimentName+'/'+ modelName+'/reasrs.pkl', 'wb') as f:
@@ -1059,6 +1061,8 @@ def main(model_filepath, result_filepath, scratch_dirpath, examples_dirpath, mod
             with open(result_filepath+'/'+ExperimentName+'/'+ modelName+'/neuron_dict.pkl', 'wb') as f:
                 pickle.dump(neuron_dict, f) 
         if use_h5:
+            with h5py.File('./'+ExperimentName+'/'+ modelName+'/results.h5', "w") as f:
+                f.create_dataset('output', data=output)
             with h5py.File('./'+ExperimentName+'/'+ modelName+'/results.h5', "w") as f:
                 f.create_dataset('results', data=results)
             with h5py.File('./'+ExperimentName+'/'+ modelName+'/reasrs.h5', "w") as f:
