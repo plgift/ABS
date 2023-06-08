@@ -363,8 +363,8 @@ def find_min_max(model_name, all_ps, sample_layers, cut_val=20, top_k = 10):
     # early layers
     labels = {}
     top_n_neurons
-    numKeys=len(sorted_key)
-    for i in random.sample(numKeys,top_n_neurons):
+    #numKeys=len(sorted_key)
+    for i in random.sample(list(range(len(sorted_key))),top_n_neurons):
         k = sorted_key[-i-1]
         layer = k[0]
         neuron = k[1]
