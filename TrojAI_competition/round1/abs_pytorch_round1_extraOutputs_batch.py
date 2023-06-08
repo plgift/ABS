@@ -4,7 +4,11 @@ def main(model_filepath, result_filepath, scratch_dirpath, examples_dirpath, mod
           modelnums=f.read().splitlines()
         
     for i in modelnums:
-            abs_pytorch_round1_extraOutputs(model_filepath+i+'/model.pt', result_filepath, scratch_dirpath, examples_dirpath +i+'/example_data/', i , ExperimentName)
+            try:
+                 print("helloooooo")
+                 abs_pytorch_round1_extraOutputs(model_filepath+i+'/model.pt', result_filepath, scratch_dirpath, examples_dirpath +i+'/example_data/', i , ExperimentName)
+            except:
+                 print("model:"+i+ "failed")
 
 
 
