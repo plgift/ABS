@@ -1,6 +1,7 @@
 #extract ground truth given 
 import pandas
 import os
+import pickle
 
 DM_gt=[]
 with open("/mnt/nfs/ml-shared/trojai_data/ABS/TrojAI_competition/round1/densenetModelNames100.txt") as f:
@@ -30,8 +31,8 @@ with open("/mnt/nfs/ml-shared/trojai_data/ABS/TrojAI_competition/round1/resnetMo
                 RM_gt.append(line)
 f.close
 
-with open(result_filepath+'/'+ExperimentName+'/'+ modelName+'/output.pkl', 'wb') as f:
-    pickle.dump(RM_gt, f)
+with open('/mnt/nfs/ml-shared/trojai_data/ABS/TrojAI_competition/round1/DMgt.pkl', 'wb') as f:
+    pickle.dump(DM_gt, f)
 
-with open(result_filepath+'/'+ExperimentName+'/'+ modelName+'/output.pkl', 'wb') as f:
+with open('/mnt/nfs/ml-shared/trojai_data/ABS/TrojAI_competition/round1/RMgt.pkl', 'wb') as f:
     pickle.dump(RM_gt, f)
